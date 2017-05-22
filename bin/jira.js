@@ -52,6 +52,17 @@ requirejs([
     });
 
   program
+    .command('move <issue> <transitionName>')
+    .description('Move an issue to a transition name.')
+    .action(function (issue, transitionName) {
+      auth.setConfig(function (auth) {
+        if (auth) {
+          transitions.move(issue, transitionName);
+        }
+      });
+    });
+
+  program
     .command('stop <issue>')
     .description('Stop working on an issue.')
     .action(function (issue) {
@@ -223,6 +234,38 @@ requirejs([
       auth.setConfig(function (auth) {
         if (auth) {
           create.newIssue(projIssue);
+        }
+      });
+    });
+
+  program
+    .command('new-issue')
+    .option("-p, --project [value]", "Project ID")
+    .option("-e, --parrentTask [value]", "Parent task ID (number only)")
+    .option("-r, --priority [value]", "Priority ID")
+    .option("-y, --type [value]", "Issue type ID")
+    .option("-t, --title [value]", "Issue title")
+    .option("-d, --description [value]", "Issue description")
+    .option("-a, --assignee [value]", "Assignee")
+    .option("-s, --sprint [value]", "Sprint ID")
+    .option("-l, --sprintCustomField [value]", "Sprint custom field")
+    .description('Create an issue or a sub-task')
+    .action(function (options) {
+      auth.setConfig(function (auth) {
+        if (auth) {
+          create.saveIssue({
+            fields: {
+              project: { id: options.project },
+              parent: options.parrentTask ? { key: options.parrentTask } : undefined,
+
+              issuetype: { id: options.type },
+              summary: options.title,
+              description: options.description,
+              priority: { id: options.priority },
+              assignee: { name: options.assignee },
+              [options.sprintCustomField]: Number(options.sprint),
+            }
+          });
         }
       });
     });
