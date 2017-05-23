@@ -248,6 +248,8 @@ then
   git push --tags
 
   # moveCard with the version number and QA username
-  echo 'hello'
+  LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+  moveCard $ISSUE_ID "Done at $LATEST_TAG" $QA_USERNAME
+  echo "Done for $LATEST_TAG"
 fi
 
