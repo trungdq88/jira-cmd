@@ -161,15 +161,16 @@ then
     answer=$( while ! head -c 1 | grep -i '[ac]' ;do true ;done )
     stty $old_stty_cfg
     if echo "$answer" | grep -iq "^a" ;then
+      ISSUE_ID=$(git branch -v | grep '^*' | cut -d ' ' -f 2 | cut -d '/' -f 1)
       echo Add all and commit
-      echo -ne "${COLOR_GREEN}Commit message: ${COLOR_RESET}"
+      echo -ne "${COLOR_GREEN}Commit message (Enter = use issue $ISSUE_ID title): ${COLOR_RESET}"
       read answer
-      BRANCH_NAME=$(git branch -v | grep '^*' | cut -d ' ' -f 2 | cut -d '/' -f 1)
       git add --all
       if echo "$answer" | grep -iq "^$" ;then
-        echo "Commit with issue title"
+        ISSUE_SUMMARY=$(jira show $ISSUE_ID | grep -m1 Summary | cut -d '│' -f 3 | awk '{$1=$1};1')
+        git commit -m "[$ISSUE_ID] $ISSUE_SUMMARY"
       else
-        git commit -m "[$BRANCH_NAME] $answer"
+        git commit -m "[$ISSUE_ID] $answer"
       fi
     else
       echo Cancelled
