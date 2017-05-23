@@ -172,6 +172,7 @@ then
       else
         git commit -m "[$ISSUE_ID] $answer"
       fi
+      git status
     else
       echo Cancelled
     fi
