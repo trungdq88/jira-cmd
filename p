@@ -218,6 +218,14 @@ then
   # Merge to master and create PR to production
   git merge master
 
+  CONFLICT_COUNT=$(git ls-files -u | wc -l)
+  if echo "$CONFLICT_COUNT" | grep -iq "^\s*0\s*$" ;then
+    echo "No conflicts"
+  else
+    echo -e "${COLOR_RED}There are conflicts when merge from master, please resolve${COLOR_RESET}"
+    exit 1
+  fi
+
   # Bump version (save the version number)
   # Push master with tags to all remotes
   # moveCard with the version number and QA username
