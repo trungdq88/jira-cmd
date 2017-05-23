@@ -38,6 +38,25 @@ activeSprint() {
   jira sprint -r "$ACTIVE_BOARD" | egrep 'ACTIVE' | tr -s ' ' | cut -d '│' -f 2 | awk '{$1=$1};1'
 }
 
+moveCard() {
+  ISSUE_ID=$1
+  VERSION=$2
+  QA_USERNAME=$3
+
+  echo "$ISSUE_ID / $VERSION / $QA_USERNAME"
+
+  jira assign $ISSUE_ID $ME
+  jira move $ISSUE_ID "Start Analysis"
+  jira move $ISSUE_ID "Analysis Complete"
+  jira move $ISSUE_ID "Developer Assigned"
+  jira move $ISSUE_ID "Code Review"
+  jira move $ISSUE_ID "Start Review"
+  jira move $ISSUE_ID "Review Passed"
+  jira move $ISSUE_ID "Deployed"
+  jira comment $ISSUE_ID "Done at $VERSION"
+  jira assign $ISSUE_ID $QA_USERNAME
+}
+
 if [ $# -eq 0 ]
   then
     echo "No arguments supplied"
@@ -68,42 +87,30 @@ fi
 if [ "$1" == "moveCard" ]
   then
 
-  if [ $# -eq 1 ]
+    ISSUE_ID=$2
+    VERSION=$3
+    QA_USERNAME=$4
+
+    if [ -z "$ISSUE_ID" ]
     then
-      echo "Please set issue number"
-    else
-      jira assign $2 $ME
-      [ $? -eq 0 ] || exit $?;
-
-      jira move $2 "Start Analysis"
-      [ $? -eq 0 ] || exit $?;
-
-      jira move $2 "Analysis Complete"
-      [ $? -eq 0 ] || exit $?;
-
-      jira move $2 "Developer Assigned"
-      [ $? -eq 0 ] || exit $?;
-
-      jira move $2 "Code Review"
-      [ $? -eq 0 ] || exit $?;
-
-      jira move $2 "Start Review"
-      [ $? -eq 0 ] || exit $?;
-
-      jira move $2 "Review Passed"
-      [ $? -eq 0 ] || exit $?;
-
-      jira move $2 "Deployed"
-      [ $? -eq 0 ] || exit $?;
-
-      jira comment $2 "Done at $3"
-      [ $? -eq 0 ] || exit $?;
-
-      jira assign $2 $4
-      [ $? -eq 0 ] || exit $?;
-
-      echo "Done!"
+      echo "Please set QA username"
+      exit 1
     fi
+
+    if [ -z "$VERSION" ]
+    then
+      echo "Please set version"
+      exit 1
+    fi
+
+    if [ -z "$QA_USERNAME" ]
+    then
+      echo "Please set QA username"
+      exit 1
+    fi
+
+    moveCard $ISSUE_ID "$VERSION" "$QA_USERNAME"
+    echo "Done!"
 fi
 
 if [ "$1" == "start" ]
@@ -214,7 +221,7 @@ then
   fi
 
   # Run tests
-  yarn test
+  # yarn test
 
   # Merge to master and create PR to production
   git merge master
@@ -228,8 +235,19 @@ then
     exit 1
   fi
 
+  # Switch to master
+  git checkout master
+
+  # Should be fast-forward
+  git merge $CURRENT_BRANCH
+
   # Bump version (save the version number)
+  npm version patch
+
   # Push master with tags to all remotes
+  git push
+  git push --tags
+
   # moveCard with the version number and QA username
   echo 'hello'
 fi
