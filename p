@@ -132,13 +132,11 @@ then
   BRANCH_NAME="$ISSUE_ID/$ISSUE_SUMMARY_SLUG"
 
   EXIST_BRANCH=$(git branch -v | grep "\s*$BRANCH_NAME")
-  if echo "$EXIST_BRANCH" | grep -iq "^$" ;then
-    echo "OK"
-  else
-    echo "Branch exists"
-  fi
 
-  exit
+  if git show-ref --quiet "refs/heads/$BRANCH_NAME";then
+    echo -e "${COLOR_RED}Branch "$BRANCH_NAME" already exists ${COLOR_RESET}"
+    exit 1
+  fi
 
   # Create branch with name from issue ID
   echo "Creating branch: $BRANCH_NAME"
