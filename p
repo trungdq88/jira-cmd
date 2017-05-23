@@ -129,10 +129,20 @@ then
   ISSUE_ID="$2"
   ISSUE_SUMMARY=$(jira show $2 | grep -m1 Summary | cut -d '│' -f 3 | awk '{$1=$1};1')
   ISSUE_SUMMARY_SLUG=$(echo "$ISSUE_SUMMARY" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/ /g' -e 's/  */-/g' -e 's/.{10,}//' | cut -c 1-50)
+  BRANCH_NAME="$ISSUE_ID/$ISSUE_SUMMARY_SLUG"
+
+  EXIST_BRANCH=$(git branch -v | grep "\s*$BRANCH_NAME")
+  if echo "$EXIST_BRANCH" | grep -iq "^$" ;then
+    echo "OK"
+  else
+    echo "Branch exists"
+  fi
+
+  exit
 
   # Create branch with name from issue ID
-  echo "Creating branch: $ISSUE_ID/$ISSUE_SUMMARY_SLUG"
-  git checkout -b "$ISSUE_ID-$ISSUE_SUMMARY_SLUG"
+  echo "Creating branch: $BRANCH_NAME"
+  git checkout -b "$BRANCH_NAME"
 
   echo "Pushing branch to all remotes..."
   # Push branch to all remotes
