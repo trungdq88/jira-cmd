@@ -1,7 +1,5 @@
 #!/bin/bash
 
-declare -A colors
-
 # Reset
 COLOR_RESET='\033[0m'       # Text Reset
 
