@@ -222,6 +222,7 @@ then
   if echo "$CONFLICT_COUNT" | grep -iq "^\s*0\s*$" ;then
     echo "No conflicts"
   else
+    git status
     echo -e "${COLOR_RED}There are conflicts when merge from master, please resolve${COLOR_RESET}"
     exit 1
   fi
