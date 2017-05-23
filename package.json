@@ -34,6 +34,7 @@
     "url": "git://github.com/germanrcuriel/jira-cmd.git"
   },
   "bin": {
-    "jira": "./bin/jira.js"
+    "jira": "./bin/jira.js",
+    "p": "./bin/p"
   }
 }

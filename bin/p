@@ -177,7 +177,7 @@ then
     echo Repo is dirty, please commit current changes before start a new task
     # show git status
     git status
-    echo -e "${COLOR_GREEN}[a = add all & commit] ${COLOR_BLUE}[c = cancel]${COLOR_RESET}"
+    echo -e "${COLOR_GREEN}[a = add all & commit] ${COLOR_YELLOW}[d = view diff] ${COLOR_BLUE}[c = cancel]${COLOR_RESET}"
     old_stty_cfg=$(stty -g)
     stty raw -echo
     answer=$( while ! head -c 1 | grep -i '[ac]' ;do true ;done )
@@ -190,9 +190,9 @@ then
       git add --all
       if echo "$answer" | grep -iq "^$" ;then
         ISSUE_SUMMARY=$(jira show $ISSUE_ID | grep -m1 Summary | cut -d '│' -f 3 | awk '{$1=$1};1')
-        git commit -m "[$ISSUE_ID] $ISSUE_SUMMARY"
+        git commit -m "$ISSUE_ID $ISSUE_SUMMARY"
       else
-        git commit -m "[$ISSUE_ID] $answer"
+        git commit -m "$ISSUE_ID $answer"
       fi
       git status
     else
@@ -267,4 +267,3 @@ then
   moveCard $ISSUE_ID $LATEST_TAG $QA_USERNAME
   echo "Done for $LATEST_TAG"
 fi
-
