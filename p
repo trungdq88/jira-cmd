@@ -1,5 +1,19 @@
 #!/bin/bash
 
+declare -A colors
+
+# Reset
+COLOR_RESET='\033[0m'       # Text Reset
+
+COLOR_BLACK='\033[0;30m'        # Black
+COLOR_RED='\033[0;31m'          # Red
+COLOR_GREEN='\033[0;32m'        # Green
+COLOR_YELLOW='\033[0;33m'       # Yellow
+COLOR_BLUE='\033[0;34m'         # Blue
+COLOR_PURPLE='\033[0;35m'       # Purple
+COLOR_CYAN='\033[0;36m'         # Cyan
+COLOR_WHITE='\033[0;37m'
+
 # (10102) Sub-task
 # (10200) Other-sub-task
 # (10100) Story
@@ -130,12 +144,37 @@ fi
 
 if [ "$1" == "commit" ]
 then
-  # show git status
-  # [cancel][add all & commit]
-  # Enter commit msg (empty = use issue title)
-  # Prefix commit msg with issue number
-  # commit & push
-  echo 'hello'
+
+  if git status --porcelain | grep .; then
+    echo Repo is dirty, please commit current changes before start a new task
+    # show git status
+    git status
+    echo -e "${COLOR_GREEN}[a = add all & commit] ${COLOR_BLUE}[c = cancel]${COLOR_RESET}"
+    old_stty_cfg=$(stty -g)
+    stty raw -echo
+    answer=$( while ! head -c 1 | grep -i '[ac]' ;do true ;done )
+    stty $old_stty_cfg
+    if echo "$answer" | grep -iq "^a" ;then
+      echo Add all and commit
+      echo -ne "${COLOR_GREEN}Commit message: ${COLOR_RESET}"
+      read answer
+      BRANCH_NAME=$(git branch -v | grep '^*' | cut -d ' ' -f 2)
+      git add --all
+      if echo "$answer" | grep -iq "^$" ;then
+        echo "Commit with issue title"
+      else
+        git commit -m "[$BRANCH_NAME] $answer"
+      fi
+    else
+      echo Cancelled
+    fi
+    # [cancel][add all & commit]
+    # Enter commit msg (empty = use issue title)
+    # Prefix commit msg with issue number
+    # commit & push
+  else
+    echo "There is nothing to commit"
+  fi
 fi
 
 if [ "$1" == "done" ]
