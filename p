@@ -116,7 +116,7 @@ then
 
   ISSUE_ID="$2"
   ISSUE_SUMMARY=$(jira show $2 | grep -m1 Summary | cut -d '│' -f 3 | awk '{$1=$1};1')
-  ISSUE_SUMMARY_SLUG=$(echo "$ISSUE_SUMMARY" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/ /g' -e 's/  */-/g' -e 's/.{10,}//' | cut -c 1-5)
+  ISSUE_SUMMARY_SLUG=$(echo "$ISSUE_SUMMARY" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/ /g' -e 's/  */-/g' -e 's/.{10,}//' | cut -c 1-50)
 
   # Create branch with name from issue ID
   echo "Creating branch: $ISSUE_ID-$ISSUE_SUMMARY_SLUG"
@@ -126,6 +126,16 @@ then
   # Push branch to all remotes
   git remote | xargs -L1 git push --all
   echo 'Done!'
+fi
+
+if [ "$1" == "commit" ]
+then
+  # show git status
+  # [cancel][add all & commit]
+  # Enter commit msg (empty = use issue title)
+  # Prefix commit msg with issue number
+  # commit & push
+  echo 'hello'
 fi
 
 if [ "$1" == "done" ]
@@ -140,12 +150,3 @@ then
   echo 'hello'
 fi
 
-if [ "$1" == "commit" ]
-then
-  # show git status
-  # [cancel][add all & commit]
-  # Enter commit msg (empty = use issue title)
-  # Prefix commit msg with issue number
-  # commit & push
-  echo 'hello'
-fi
