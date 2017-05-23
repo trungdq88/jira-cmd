@@ -133,7 +133,7 @@ then
   ISSUE_SUMMARY_SLUG=$(echo "$ISSUE_SUMMARY" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/ /g' -e 's/  */-/g' -e 's/.{10,}//' | cut -c 1-50)
 
   # Create branch with name from issue ID
-  echo "Creating branch: $ISSUE_ID-$ISSUE_SUMMARY_SLUG"
+  echo "Creating branch: $ISSUE_ID/$ISSUE_SUMMARY_SLUG"
   git checkout -b "$ISSUE_ID-$ISSUE_SUMMARY_SLUG"
 
   echo "Pushing branch to all remotes..."
@@ -158,7 +158,7 @@ then
       echo Add all and commit
       echo -ne "${COLOR_GREEN}Commit message: ${COLOR_RESET}"
       read answer
-      BRANCH_NAME=$(git branch -v | grep '^*' | cut -d ' ' -f 2)
+      BRANCH_NAME=$(git branch -v | grep '^*' | cut -d ' ' -f 2 | cut -d '/' -f 1)
       git add --all
       if echo "$answer" | grep -iq "^$" ;then
         echo "Commit with issue title"
