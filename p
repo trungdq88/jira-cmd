@@ -94,3 +94,55 @@ if [ "$1" == "moveCard" ]
     fi
 fi
 
+if [ "$1" == "start" ]
+then
+  if [ $# -eq 1 ]
+  then
+    echo "Please set issue number"
+    exit 1
+  fi
+
+  # Input: issue ID
+
+  # Check current repo is clean
+  if git status --porcelain | grep .; then
+    echo Repo is dirty, please commit changes before bumping version
+    exit 1
+  fi
+
+  # Checkout master
+  echo "Checking out latest commits from master"
+  git checkout master && git pull
+
+  $ISSUE_ID=$2
+  $ISSUE_SUMMARY=$(jira show $2 | grep -m1 Summary | cut -d '│' -f 3 | awk '{$1=$1};1')
+  $ISSUE_SUMMARY_SLUG=$(echo "$ISSUE_SUMMARY" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/ /g' -e 's/  */-/g')
+
+  echo "$ISSUE_ID-$ISSUE_SUMMARY_SLUG"
+
+  # Create branch with name from issue ID
+  # Push branch to all origin
+  echo 'hello'
+fi
+
+if [ "$1" == "done" ]
+then
+  # Input: issue ID, QA username
+  # Check current clean, make sure current branch is not master
+  # Run tests
+  # Merge to master and create PR to production
+  # Bump version (save the version number)
+  # Push master with tags to all origin
+  # moveCard with the version number and QA username
+  echo 'hello'
+fi
+
+if [ "$1" == "commit" ]
+then
+  # show git status
+  # [cancel][add all & commit]
+  # Enter commit msg (empty = use issue title)
+  # Prefix commit msg with issue number
+  # commit & push
+  echo 'hello'
+fi
