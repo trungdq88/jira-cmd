@@ -195,14 +195,7 @@ fi
 if [ "$1" == "done" ]
 then
   # Input: issue ID, QA username
-  ISSUE_ID=$2
-  QA_USERNAME=$3
-
-  if [ -z "$ISSUE_ID" ]
-  then
-    echo "Please set issue number"
-    exit 1
-  fi
+  QA_USERNAME=$2
 
   if [ -z "$QA_USERNAME" ]
   then
@@ -210,14 +203,20 @@ then
     exit 1
   fi
 
-  # Check current clean, make sure current branch is not master
-  if git status --porcelain | grep .; then
-    echo Repo is dirty, please commit current changes before finishing a task
-  fi
+  ISSUE_ID=$(git branch -v | grep '^*' | cut -d ' ' -f 2 | cut -d '/' -f 1)
+
+  echo "$ISSUE_ID"
 
   CURRENT_BRANCH=$(git branch -v | grep "\s*\*" | cut -d ' ' -f 2)
   if echo "$CURRENT_BRANCH" | grep -iq "^master$" ;then
     echo "You are not suppose to run this command on master"
+    exit 1
+  fi
+
+  # Check current clean, make sure current branch is not master
+  if git status --porcelain | grep .; then
+    echo Repo is dirty, please commit current changes before finishing a task
+    exit 1
   fi
 
   # Run tests
