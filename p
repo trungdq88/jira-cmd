@@ -131,7 +131,7 @@ then
   ISSUE_SUMMARY_SLUG=$(echo "$ISSUE_SUMMARY" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/ /g' -e 's/  */-/g' -e 's/.{10,}//' | cut -c 1-50)
   BRANCH_NAME="$ISSUE_ID/$ISSUE_SUMMARY_SLUG"
 
-  EXIST_BRANCH=$(git branch -v | grep "\s*$BRANCH_NAME")
+  EXIST_BRANCH=$(git branch -v | grep "\s*\*$BRANCH_NAME")
 
   if git show-ref --quiet "refs/heads/$BRANCH_NAME";then
     echo -e "${COLOR_RED}Branch "$BRANCH_NAME" already exists ${COLOR_RESET}"
@@ -187,8 +187,34 @@ fi
 if [ "$1" == "done" ]
 then
   # Input: issue ID, QA username
+  ISSUE_ID=$2
+  QA_USERNAME=$3
+
+  if [ -z "$ISSUE_ID" ]
+  then
+    echo "Please set issue number"
+    exit 1
+  fi
+
+  if [ -z "$QA_USERNAME" ]
+  then
+    echo "Please set QA username"
+    exit 1
+  fi
+
   # Check current clean, make sure current branch is not master
+  if git status --porcelain | grep .; then
+    echo Repo is dirty, please commit current changes before finishing a task
+  fi
+
+  CURRENT_BRANCH=$(git branch -v | grep "\s*\*" | cut -d ' ' -f 2)
+  if echo "$CURRENT_BRANCH" | grep -iq "^master$" ;then
+    echo "You are not suppose to run this command on master"
+  fi
+
   # Run tests
+  yarn test
+
   # Merge to master and create PR to production
   # Bump version (save the version number)
   # Push master with tags to all remotes
