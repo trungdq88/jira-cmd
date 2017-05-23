@@ -67,19 +67,34 @@ if [ "$1" == "activeSprint" ]
   activeSprint
 fi
 
+# newTask "test 8"
 if [ "$1" == "newTask" ]
   then
 
   if [ $# -eq 1 ]
     then
       echo "Please set task title"
+      exit 1
+    fi
+
+    ISSUE_TITLE=$2
+
+    echo "Get active sprint..."
+    ACTIVE_SPRINT=$(activeSprint)
+    echo "Creating issue for active sprint $ACTIVE_SPRINT..."
+    ISSUE_ID=$(jira new-issue -p $PROJECT_SE -r $PRIORITY_MEDIUM -y $ISSUE_TYPE_TASK -t "$ISSUE_TITLE" -d "$ISSUE_TITLE" -a $ME -l $SPRINT_CUSTOM_FIELD_ID -s $ACTIVE_SPRINT | grep '^Issue ' | cut -d ' ' -f 2)
+
+    echo "Created issue $ISSUE_ID"
+
+    echo -e "Start issue $ISSUE_ID now? ${COLOR_GREEN}[y = yes] ${COLOR_BLUE}[c = cancel]${COLOR_RESET}"
+    old_stty_cfg=$(stty -g)
+    stty raw -echo
+    answer=$( while ! head -c 1 | grep -i '[yc]' ;do true ;done )
+    stty $old_stty_cfg
+    if echo "$answer" | grep -iq "^y" ;then
+      ./p start $ISSUE_ID
     else
-      echo "Get active sprint..."
-      ACTIVE_SPRINT=$(activeSprint)
-      echo "Creating issue for active sprint $ACTIVE_SPRINT..."
-      jira new-issue -p $PROJECT_SE -r $PRIORITY_MEDIUM -y $ISSUE_TYPE_TASK -t "$2" -d "$2" -a $ME -l $SPRINT_CUSTOM_FIELD_ID -s $ACTIVE_SPRINT
-      [ $? -eq 0 ] || exit $?;
-      echo "Done!"
+      echo "Done"
     fi
 fi
 
