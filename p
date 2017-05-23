@@ -249,7 +249,7 @@ then
 
   # moveCard with the version number and QA username
   LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-  moveCard $ISSUE_ID "Done at $LATEST_TAG" $QA_USERNAME
+  moveCard $ISSUE_ID $LATEST_TAG $QA_USERNAME
   echo "Done for $LATEST_TAG"
 fi
 
