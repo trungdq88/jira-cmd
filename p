@@ -216,6 +216,8 @@ then
   yarn test
 
   # Merge to master and create PR to production
+  git merge master
+
   # Bump version (save the version number)
   # Push master with tags to all remotes
   # moveCard with the version number and QA username
