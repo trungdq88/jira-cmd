@@ -92,7 +92,7 @@ if [ "$1" == "newTask" ]
     answer=$( while ! head -c 1 | grep -i '[yc]' ;do true ;done )
     stty $old_stty_cfg
     if echo "$answer" | grep -iq "^y" ;then
-      ./p start $ISSUE_ID
+      p start $ISSUE_ID
     else
       echo "Done"
     fi
@@ -180,8 +180,20 @@ then
     echo -e "${COLOR_GREEN}[a = add all & commit] ${COLOR_YELLOW}[d = view diff] ${COLOR_BLUE}[c = cancel]${COLOR_RESET}"
     old_stty_cfg=$(stty -g)
     stty raw -echo
-    answer=$( while ! head -c 1 | grep -i '[ac]' ;do true ;done )
+    answer=$( while ! head -c 1 | grep -i '[acd]' ;do true ;done )
     stty $old_stty_cfg
+
+    if echo "$answer" | grep -iq "^d" ;then
+      git add --all
+      git diff --staged
+      # Ask again
+      echo -e "${COLOR_GREEN}[a = add all & commit] ${COLOR_BLUE}[c = cancel]${COLOR_RESET}"
+      old_stty_cfg=$(stty -g)
+      stty raw -echo
+      answer=$( while ! head -c 1 | grep -i '[ac]' ;do true ;done )
+      stty $old_stty_cfg
+    fi
+
     if echo "$answer" | grep -iq "^a" ;then
       ISSUE_ID=$(git branch -v | grep '^*' | cut -d ' ' -f 2 | cut -d '/' -f 1)
       echo Add all and commit
@@ -198,6 +210,7 @@ then
     else
       echo Cancelled
     fi
+
     # [cancel][add all & commit]
     # Enter commit msg (empty = use issue title)
     # Prefix commit msg with issue number
