@@ -106,7 +106,7 @@ then
 
   # Check current repo is clean
   if git status --porcelain | grep .; then
-    echo Repo is dirty, please commit changes before bumping version
+    echo Repo is dirty, please commit current changes before start a new task
     exit 1
   fi
 
@@ -116,13 +116,16 @@ then
 
   ISSUE_ID="$2"
   ISSUE_SUMMARY=$(jira show $2 | grep -m1 Summary | cut -d '│' -f 3 | awk '{$1=$1};1')
-  ISSUE_SUMMARY_SLUG=$(echo "$ISSUE_SUMMARY" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/ /g' -e 's/  */-/g')
-
-  echo "$ISSUE_ID-$ISSUE_SUMMARY_SLUG"
+  ISSUE_SUMMARY_SLUG=$(echo "$ISSUE_SUMMARY" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/ /g' -e 's/  */-/g' -e 's/.{10,}//' | cut -c 1-5)
 
   # Create branch with name from issue ID
-  # Push branch to all origin
-  echo 'hello'
+  echo "Creating branch: $ISSUE_ID-$ISSUE_SUMMARY_SLUG"
+  git checkout -b "$ISSUE_ID-$ISSUE_SUMMARY_SLUG"
+
+  echo "Pushing branch to all remotes..."
+  # Push branch to all remotes
+  git remote | xargs -L1 git push --all
+  echo 'Done!'
 fi
 
 if [ "$1" == "done" ]
@@ -132,7 +135,7 @@ then
   # Run tests
   # Merge to master and create PR to production
   # Bump version (save the version number)
-  # Push master with tags to all origin
+  # Push master with tags to all remotes
   # moveCard with the version number and QA username
   echo 'hello'
 fi
