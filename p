@@ -114,7 +114,7 @@ then
   echo "Checking out latest commits from master"
   git checkout master && git pull
 
-  $ISSUE_ID=$2
+  $ISSUE_ID="$2"
   $ISSUE_SUMMARY=$(jira show $2 | grep -m1 Summary | cut -d '│' -f 3 | awk '{$1=$1};1')
   $ISSUE_SUMMARY_SLUG=$(echo "$ISSUE_SUMMARY" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/ /g' -e 's/  */-/g')
 
