@@ -57,6 +57,45 @@ moveCard() {
   jira assign $ISSUE_ID $QA_USERNAME
 }
 
+getPortaltag() {
+  PORTAL_TAG=""
+
+  if git status --porcelain | grep 'src/portals/hq' ;then
+    PORTAL_TAG="$PORTAL_TAG[HQ]"
+  fi
+  if git status --porcelain | grep 'src/portals/cdc' ;then
+    PORTAL_TAG="$PORTAL_TAG[CDC]"
+  fi
+  if git status --porcelain | grep 'src/portals/sup' ;then
+    PORTAL_TAG="$PORTAL_TAG[SUP]"
+  fi
+  if git status --porcelain | grep 'src/portals/log' ;then
+    PORTAL_TAG="$PORTAL_TAG[LOG]"
+  fi
+  if git status --porcelain | grep 'src/portals/_shared' ;then
+    PORTAL_TAG="$PORTAL_TAG[SHARED]"
+  fi
+
+  PORTAL_TAG=$(echo $PORTAL_TAG | sed -e 's/\[HQ\]\[CDC\]\[SUP\]\[LOG\].*/\[ALL\]/g')
+  PORTAL_TAG=$(echo $PORTAL_TAG | sed -e 's/\[HQ\]\[SHARED\]/\[ALL\]/g')
+  PORTAL_TAG=$(echo $PORTAL_TAG | sed -e 's/\[CDC\]\[SUP\]\[LOG\].*/\[3 PORTALS\]/g')
+  PORTAL_TAG=$(echo $PORTAL_TAG | sed -e 's/\[HQ\]\[CDC\]\[SHARED\]/\[ALL\]/g')
+  PORTAL_TAG=$(echo $PORTAL_TAG | sed -e 's/\[HQ\]\[SUP\]\[SHARED\]/\[ALL\]/g')
+  PORTAL_TAG=$(echo $PORTAL_TAG | sed -e 's/\[HQ\]\[LOG\]\[SHARED\]/\[ALL\]/g')
+  PORTAL_TAG=$(echo $PORTAL_TAG | sed -e 's/\[HQ\]\[CDC\]\[SUP\]\[SHARED\]/\[ALL\]/g')
+  PORTAL_TAG=$(echo $PORTAL_TAG | sed -e 's/\[HQ\]\[CDC\]\[LOG\]\[SHARED\]/\[ALL\]/g')
+  PORTAL_TAG=$(echo $PORTAL_TAG | sed -e 's/\[HQ\]\[SUP\]\[LOG\]\[SHARED\]/\[ALL\]/g')
+  PORTAL_TAG=$(echo $PORTAL_TAG | sed -e 's/\[HQ\]\[CDC\]\[SUP\]\[LOG\]\[SHARED\]/\[ALL\]/g')
+
+  if git status --porcelain | grep . ;then
+    if [ -z $PORTAL_TAG ] ;then
+      PORTAL_TAG="[CONFIG]"
+    fi
+  fi
+
+  echo "$PORTAL_TAG"
+}
+
 if [ $# -eq 0 ]
   then
     echo "No arguments supplied"
@@ -174,7 +213,6 @@ if [ "$1" == "commit" ]
 then
 
   if git status --porcelain | grep .; then
-    echo Repo is dirty, please commit current changes before start a new task
     # show git status
     git status
     echo -e "${COLOR_GREEN}[a = add all & commit] ${COLOR_YELLOW}[d = view diff] ${COLOR_BLUE}[c = cancel]${COLOR_RESET}"
@@ -196,15 +234,18 @@ then
 
     if echo "$answer" | grep -iq "^a" ;then
       ISSUE_ID=$(git branch -v | grep '^*' | cut -d ' ' -f 2 | cut -d '/' -f 1)
+
+      PORTAL_TAG="$(getPortaltag | tail -n1)"
+
       echo Add all and commit
       echo -ne "${COLOR_GREEN}Commit message (Enter = use issue $ISSUE_ID title): ${COLOR_RESET}"
       read answer
       git add --all
       if echo "$answer" | grep -iq "^$" ;then
         ISSUE_SUMMARY=$(jira show $ISSUE_ID | grep -m1 Summary | cut -d '│' -f 3 | awk '{$1=$1};1')
-        git commit -m "$ISSUE_ID $ISSUE_SUMMARY"
+        git commit -m "$PORTAL_TAG $ISSUE_ID $ISSUE_SUMMARY"
       else
-        git commit -m "$ISSUE_ID $answer"
+        git commit -m "$PORTAL_TAG $ISSUE_ID $answer"
       fi
       git status
     else
@@ -279,4 +320,9 @@ then
   LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
   moveCard $ISSUE_ID $LATEST_TAG $QA_USERNAME
   echo "Done for $LATEST_TAG"
+fi
+
+if [ "$1" == "portalTag" ]
+then
+  echo "$(getPortaltag | tail -n1)";
 fi
