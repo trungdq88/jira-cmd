@@ -248,7 +248,7 @@ then
   fi
 
   # Run tests
-  # yarn test
+  CI=true yarn test
 
   # Merge to master and create PR to production
   git merge master
