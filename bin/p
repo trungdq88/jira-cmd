@@ -288,9 +288,6 @@ then
     exit 1
   fi
 
-  # Run tests
-  CI=true yarn test
-
   # Merge to master and create PR to production
   git merge master
 
@@ -303,6 +300,9 @@ then
     exit 1
   fi
 
+  # Run tests
+  CI=true yarn test
+
   # Switch to master
   git checkout master
 
@@ -313,7 +313,7 @@ then
   npm version patch
 
   # Push master with tags to all remotes
-  git push
+  git push --all
   git push --tags
 
   # moveCard with the version number and QA username
