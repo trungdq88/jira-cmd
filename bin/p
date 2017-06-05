@@ -48,7 +48,8 @@ moveCard() {
   jira assign $ISSUE_ID $ME
   jira move $ISSUE_ID "Start Analysis"
   jira move $ISSUE_ID "Analysis Complete"
-  jira move $ISSUE_ID "Developer Assigned"
+  jira move $ISSUE_ID "Start progress"
+  jira move $ISSUE_ID "Start Progress"
   jira move $ISSUE_ID "Code Review"
   jira move $ISSUE_ID "Start Review"
   jira move $ISSUE_ID "Review Passed"
@@ -302,6 +303,7 @@ then
 
   # Run tests
   CI=true yarn test
+  [ $? -eq 0 ] || exit $?;
 
   # Switch to master
   git checkout master
